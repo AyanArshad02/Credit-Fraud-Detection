@@ -1,0 +1,57 @@
+1. Precision (Fraud Detection Accuracy)
+🔹 Definition: Precision measures how many of the transactions predicted as fraud were actually fraud.
+🔹 Interpretation:
+High precision means fewer false alarms (legitimate transactions wrongly flagged as fraud).
+If precision is low, too many normal transactions are being wrongly flagged, leading to frustrated customers.
+
+🔹 Example:
+The model predicts 100 transactions as fraud, but only 30 are actually fraud → Precision = 30/100 = 0.30 (30%).
+Low precision → Many false positives (FP), leading to inconvenience for genuine users.
+
+
+2. Recall (Fraud Catch Rate) – Most Critical
+🔹 Definition: Recall measures how many actual frauds were correctly detected.
+🔹 Interpretation:
+High recall means very few fraud cases are missed.
+If recall is low, fraudsters escape detection, causing financial loss.
+
+🔹 Example:
+There are 100 actual frauds, but the model detects only 30 → Recall = 30/100 = 0.30 (30%).
+Low recall → Many fraudulent transactions go undetected (false negatives).
+
+⚠ Why recall is crucial?
+Missing a fraudulent transaction (false negative) means the fraudster gets away!
+A recall of 90%+ is often preferred in fraud detection.
+
+
+3. F1-score (Balance Between Precision & Recall)
+🔹 Definition: F1-score is the harmonic mean of precision and recall.
+
+🔹 Interpretation:
+- If precision is too high, recall may be too low (many frauds missed).
+- If recall is too high, precision may be too low (too many false alarms).
+- F1-score finds the best trade-off to balance both.
+- Higher F1-score means a better fraud detection balance.
+
+----------------------------------------------------------------------------------------
+
+1. If False Positives (FP) are costly → Precision
+
+- Example: If blocking a legitimate transaction causes frustration for users, you want high precision (fewer false positives).
+
+2. If False Negatives (FN) are costly → Recall
+
+- Example: If missing a fraudulent transaction leads to financial losses, then high recall is better (catching most fraud cases).
+
+3. If Both False Positives & False Negatives Matter → F1-score
+
+Since we have a balanced dataset, F1-score is ideal because it balances precision & recall.
+
+
+Final Recommendation :
+✅ Use F1-score if you want a balanced fraud detection model
+✅ Use Recall if catching all fraud cases is more important
+✅ Use Precision if reducing false alarms is more important
+
+We will focus on high F1-score as we want a balanced fraud detection model
+Therefore, We will be Moving ahead with Logistic Regression and Power Transformer
