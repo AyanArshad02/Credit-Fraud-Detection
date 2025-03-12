@@ -24,7 +24,7 @@ CONFIG = {
     "mlflow_tracking_uri": "https://dagshub.com/AyanArshad02/Credit-Fraud-Detection.mlflow",
     "dagshub_repo_owner": 'AyanArshad02',
     "dagshub_repo_name": 'Credit-Fraud-Detection',
-    "experiment_name": "Feature Engineering & Trying different Models"
+    "experiment_name": "Feature Engineering & Trying different Models for selecting the best model"
 }
 
 # ========================== SETUP MLflow & DAGSHUB ==========================
