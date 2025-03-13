@@ -176,3 +176,4 @@ cython_debug/
 
 details.txt
 notebooks/creditcard.csv
+mlruns/
