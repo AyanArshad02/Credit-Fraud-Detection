@@ -50,23 +50,42 @@ def train_and_log_model(X_train, X_test, y_train, y_test, transformer):
     with mlflow.start_run():
         grid_search = GridSearchCV(LogisticRegression(), param_grid, cv=5, scoring="f1", n_jobs=-1)
         grid_search.fit(X_train, y_train)
-        
+
+        # Log all hyperparameter tuning runs
+        for params, mean_score, std_score in zip(grid_search.cv_results_["params"], 
+                                                 grid_search.cv_results_["mean_test_score"], 
+                                                 grid_search.cv_results_["std_test_score"]):
+            with mlflow.start_run(run_name=f"LR with params: {params}", nested=True):
+                model = LogisticRegression(**params)
+                model.fit(X_train, y_train)
+                
+                y_pred = model.predict(X_test)
+                
+                metrics = {
+                    "accuracy": accuracy_score(y_test, y_pred),
+                    "precision": precision_score(y_test, y_pred),
+                    "recall": recall_score(y_test, y_pred),
+                    "f1_score": f1_score(y_test, y_pred),
+                    "mean_cv_score": mean_score,
+                    "std_cv_score": std_score
+                }
+                
+                # Log parameters & metrics
+                mlflow.log_params(params)
+                mlflow.log_metrics(metrics)
+                
+                print(f"Params: {params} | Accuracy: {metrics['accuracy']:.4f} | F1: {metrics['f1_score']:.4f}")
+
+        # Log the best model
+        best_params = grid_search.best_params_
         best_model = grid_search.best_estimator_
-        y_pred = best_model.predict(X_test)
-        
-        metrics = {
-            "accuracy": accuracy_score(y_test, y_pred),
-            "precision": precision_score(y_test, y_pred),
-            "recall": recall_score(y_test, y_pred),
-            "f1_score": f1_score(y_test, y_pred)
-        }
-        
-        # Log parameters & metrics
-        mlflow.log_params(grid_search.best_params_)
-        mlflow.log_metrics(metrics)
+        best_f1 = grid_search.best_score_
+
+        mlflow.log_params(best_params)
+        mlflow.log_metric("best_f1_score", best_f1)
         mlflow.sklearn.log_model(best_model, "logistic_regression_model")
         
-        print(f"Best Params: {grid_search.best_params_} | F1 Score: {metrics['f1_score']:.4f}")
+        print(f"\nBest Params: {best_params} | Best F1 Score: {best_f1:.4f}")
 
 # ==========================
 # Main Execution
@@ -74,4 +93,5 @@ def train_and_log_model(X_train, X_test, y_train, y_test, transformer):
 if __name__ == "__main__":
     (X_train, X_test, y_train, y_test), transformer = load_and_prepare_data("notebooks/data.csv")
     train_and_log_model(X_train, X_test, y_train, y_test, transformer)
+
 
