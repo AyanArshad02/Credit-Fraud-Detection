@@ -9,13 +9,18 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import PowerTransformer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import warnings
+from dotenv import load_dotenv
+load_dotenv()
+
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
 
 # Set MLflow Tracking URI & DAGsHub integration
-MLFLOW_TRACKING_URI = "https://dagshub.com/AyanArshad02/Credit-Fraud-Detection.mlflow"
-dagshub.init(repo_owner='AyanArshad02', repo_name='Credit-Fraud-Detection', mlflow=True)
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI")
+repo_owner = os.getenv("REPO_OWNER")
+repo_name = os.getenv("REPO_NAME")
+dagshub.init(repo_owner=repo_owner, repo_name=repo_name, mlflow=True)
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 mlflow.set_experiment("Logistic Regression with PowerTransformer")
 
