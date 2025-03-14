@@ -14,6 +14,9 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import warnings
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 warnings.filterwarnings("ignore")
 
@@ -21,9 +24,9 @@ warnings.filterwarnings("ignore")
 CONFIG = {
     "data_path": "notebooks/data.csv",
     "test_size": 0.2,
-    "mlflow_tracking_uri": "https://dagshub.com/AyanArshad02/Credit-Fraud-Detection.mlflow",
-    "dagshub_repo_owner": 'AyanArshad02',
-    "dagshub_repo_name": 'Credit-Fraud-Detection',
+    "mlflow_tracking_uri": os.getenv("MLFLOW_TRACKING_URI"),
+    "dagshub_repo_owner": os.getenv("REPO_OWNER"),
+    "dagshub_repo_name": os.getenv("REPO_NAME"),
     "experiment_name": "Feature Engineering & Trying different Models for selecting the best model"
 }
 
