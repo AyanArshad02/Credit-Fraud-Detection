@@ -8,3 +8,8 @@
 # params.yaml
 data_preprocessing:
   test_size: 0.25
+
+model:
+  C: 0.1
+  solver: 'liblinear'
+  penalty: 'l2'
