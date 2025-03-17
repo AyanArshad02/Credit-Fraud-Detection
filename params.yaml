@@ -1,0 +1,10 @@
+# This file is used to store hyperparameters, model settings, and other configuration parameters that our ML pipeline needs.
+
+# Why Use params.yaml?
+# Keeps hyperparameters & settings in one place
+# Enables reproducibility across different runs
+# Allows DVC to track changes in hyperparameters
+
+# params.yaml
+data_preprocessing:
+  test_size: 0.25
