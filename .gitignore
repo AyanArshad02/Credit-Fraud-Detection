@@ -178,5 +178,6 @@ details.txt
 notebooks/creditcard.csv
 mlruns/
 local_s3/
-data/
+/data/
 models/
+reports/
