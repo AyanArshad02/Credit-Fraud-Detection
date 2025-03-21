@@ -1,5 +1,4 @@
 # register model
-
 import json
 import mlflow
 import logging
@@ -29,16 +28,9 @@ repo_name = os.getenv("REPO_NAME")
 
 # Set up MLflow tracking URI
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI")
-# mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-# -------------------------------------------------------------------------------------
-
-# Below code block is for local use
-# -------------------------------------------------------------------------------------
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 dagshub.init(repo_owner=repo_owner, repo_name=repo_name, mlflow=True)
 # -------------------------------------------------------------------------------------
-
 
 def load_model_info(file_path: str) -> dict:
     """Load the model info from a JSON file."""
@@ -54,34 +46,53 @@ def load_model_info(file_path: str) -> dict:
         logging.error('Unexpected error occurred while loading the model info: %s', e)
         raise
 
-def register_model(model_name: str, model_info: dict):
-    """Register the model to the MLflow Model Registry."""
+def register_model_and_transformer(model_name: str, model_info: dict, transformer_name: str, transformer_path: str):
+    """Register the model and power transformer to the MLflow Model Registry."""
     try:
-        model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
-        
-        # Register the model
-        model_version = mlflow.register_model(model_uri, model_name)
-        
-        # Transition the model to "Staging" stage
         client = mlflow.tracking.MlflowClient()
+
+        # Register the model
+        model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
+        model_version = mlflow.register_model(model_uri, model_name)
+
+        # Transition the model to "Staging"
         client.transition_model_version_stage(
             name=model_name,
             version=model_version.version,
             stage="Staging"
         )
-        
         logging.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
+
+        # Log the PowerTransformer as an artifact
+        mlflow.log_artifact(transformer_path, artifact_path="preprocessing")
+
+        # Register PowerTransformer in MLflow Model Registry
+        transformer_uri = f"runs:/{model_info['run_id']}/preprocessing/{os.path.basename(transformer_path)}"
+        transformer_version = mlflow.register_model(transformer_uri, transformer_name)
+
+        # Transition the PowerTransformer to "Staging"
+        client.transition_model_version_stage(
+            name=transformer_name,
+            version=transformer_version.version,
+            stage="Staging"
+        )
+        logging.debug(f'PowerTransformer {transformer_name} version {transformer_version.version} registered and transitioned to Staging.')
+
     except Exception as e:
-        logging.error('Error during model registration: %s', e)
+        logging.error('Error during model and transformer registration: %s', e)
         raise
 
 def main():
     try:
         model_info_path = 'reports/experiment_info.json'
         model_info = load_model_info(model_info_path)
-        
+
         model_name = "my_model"
-        register_model(model_name, model_info)
+        transformer_name = "power_transformer"
+        transformer_path = "models/power_transformer.pkl"  # Ensure this file exists
+
+        register_model_and_transformer(model_name, model_info, transformer_name, transformer_path)
+    
     except Exception as e:
         logging.error('Failed to complete the model registration process: %s', e)
         print(f"Error: {e}")
