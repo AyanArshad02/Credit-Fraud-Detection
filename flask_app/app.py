@@ -101,12 +101,38 @@ def home():
                 prediction = f"Processing Error: {e}"
         
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
-    print(f"Model Prediction: {result}")
     return render_template("index.html", result=prediction, csv_input=",".join(map(str, input_values)))
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    REQUEST_COUNT.labels(method="POST", endpoint="/predict").inc()
+    start_time = time.time()
+    
+    csv_input = request.form.get("csv_input", "").strip()
+    prediction = ""
+    
+    if csv_input:
+        try:
+            values = list(map(float, csv_input.split(",")))
+            features_df = pd.DataFrame([values], columns=feature_names)
+            
+            if power_transformer is None or model is None:
+                prediction = "Error: Model or Transformer not loaded properly."
+            else:
+                transformed_features = power_transformer.transform(features_df)
+                transformed_df = pd.DataFrame(transformed_features, columns=features_df.columns)
+                result = model.predict(transformed_df)
+                prediction = "Fraud" if result[0] == 1 else "Non-Fraud"
+                PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+        except Exception as e:
+            prediction = f"Error processing input: {e}"
+    
+    REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start_time)
+    return prediction
+
+@app.route("/metrics", methods=["GET"])
+def metrics():
+    return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
-
-
-
-
