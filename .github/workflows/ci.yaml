@@ -2,16 +2,15 @@ name: CI Pipeline
 
 on: push
 
-
 jobs:
   fraud-detection:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: setup python
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.10'
@@ -24,16 +23,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: install dependencies
+      - name: Install dependencies
         run: |
           pip install -r flask_app/requirements.txt
 
-
-      - name: run pipeline
+      - name: Verify environment variables
+        run: |
+          echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}"
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY != '' && 'Set' || 'Not Set' }}"
+          echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY != '' && 'Set' || 'Not Set' }}"
         env:
-            DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN}}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Run pipeline
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dvc repro
+
 
     #   - name: Run model tests
     #     env:
