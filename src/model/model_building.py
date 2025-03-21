@@ -7,6 +7,7 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))  # Adjust if needed
 from src.logger import logging
+from sklearn.preprocessing import PowerTransformer
 
 def load_params(params_path: str) -> dict:
     """Load parameters from a YAML file."""
@@ -57,6 +58,17 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray) -> LogisticRegression:
         logging.error('Error during model training: %s', e)
         raise
 
+
+def save_power_transformer(transformer, file_path: str) -> None:
+    """Save the trained PowerTransformer to a file."""
+    try:
+        with open(file_path, 'wb') as file:
+            pickle.dump(transformer, file)
+        logging.info('PowerTransformer saved to %s', file_path)
+    except Exception as e:
+        logging.error('Error occurred while saving the PowerTransformer: %s', e)
+        raise
+
 def save_model(model, file_path: str) -> None:
     """Save the trained model to a file."""
     try:
@@ -73,9 +85,15 @@ def main():
         X_train = train_data.iloc[:, :-1].values
         y_train = train_data.iloc[:, -1].values
 
-        clf = train_model(X_train, y_train)
-        
+        power_transformer = PowerTransformer()
+        X_train_transformed = power_transformer.fit_transform(X_train)
+
+        # Train model on transformed data
+        clf = train_model(X_train_transformed, y_train)
+
+        # Save model and PowerTransformer
         save_model(clf, 'models/model.pkl')
+        save_power_transformer(power_transformer, 'models/power_transformer.pkl')
 
     except Exception as e:
         logging.error('Failed to complete the model building process: %s', e)
