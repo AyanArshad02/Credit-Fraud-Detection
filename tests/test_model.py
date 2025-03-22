@@ -26,13 +26,13 @@ class TestCreditFraudModel(unittest.TestCase):
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
         # Load the latest version of the fraud detection model from MLflow Model Registry
-        cls.model_name = "credit_fraud_model"
+        cls.model_name = "my_model"
         cls.model_version = cls.get_latest_model_version(cls.model_name)
         cls.model_uri = f'models:/{cls.model_name}/{cls.model_version}'
         cls.model = mlflow.pyfunc.load_model(cls.model_uri)
 
-        # Load the feature transformer (scaler or PCA, etc.)
-        cls.transformer = pickle.load(open('models/feature_transformer.pkl', 'rb'))
+        # Load the power transformer used to preprocess the data
+        cls.transformer = pickle.load(open('models/power_transformer.pkl', 'rb'))
 
         # Load test dataset
         cls.test_data = pd.read_csv('data/processed/test_data.csv')
