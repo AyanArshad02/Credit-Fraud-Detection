@@ -74,6 +74,7 @@ jobs:
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: python -m unittest tests/test_flask_app.py
 
+        
     #   - name: Login to AWS ECR
     #     if: success()
     #     run: |
