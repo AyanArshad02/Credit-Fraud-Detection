@@ -44,16 +44,16 @@ model_name = "my_model"
 preprocessor_name = "power_transformer"
 
 def get_latest_model_version(model_name):
-    """Fetch latest model version from MLflow"""
+    """Fetch latest model version using search_model_versions"""
     try:
         client = mlflow.MlflowClient()
-        latest_version = client.get_latest_versions(model_name, stages=["Staging"])
-        if not latest_version:
-            latest_version = client.get_latest_versions(model_name, stages=["None"])
-        return latest_version[0].version if latest_version else None
+        versions = client.search_model_versions(f"name='{model_name}'")
+        latest_version = max(versions, key=lambda v: int(v.version)).version
+        return latest_version
     except Exception as e:
         print(f"Error fetching model version: {e}")
         return None
+
 
 model_version = get_latest_model_version(model_name)
 if model_version:
@@ -68,6 +68,18 @@ try:
 except Exception as e:
     print(f"Error loading PowerTransformer: {e}")
     power_transformer = None
+
+import numpy as np
+
+def preprocess_input(data):
+    """Preprocess user input for prediction."""
+    try:
+        input_array = np.array(data).reshape(1, -1)  # Ensure correct shape
+        transformed_input = power_transformer.transform(input_array)  # Apply transformation
+        return transformed_input
+    except Exception as e:
+        print(f"Preprocessing Error: {e}")
+        return None
 
 # -------------------------------------------------------------------------------------
 # Feature Names
@@ -105,15 +117,12 @@ def home():
                 if power_transformer is None or model is None:
                     prediction = "Error: Model or Transformer not loaded properly."
                 else:
-                    # Apply PowerTransformer
-                    transformed_features = power_transformer.transform(features_df)
-                    transformed_df = pd.DataFrame(transformed_features, columns=features_df.columns)
-                    
-                    # Predict
-                    result = model.predict(transformed_df)
-                    prediction = "Fraud" if result[0] == 1 else "Non-Fraud"
-                    
-                    PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+                    transformed_features = preprocess_input(values)
+                    if transformed_features is not None:
+                        result = model.predict(transformed_features)
+                        prediction = "Fraud" if result[0] == 1 else "Non-Fraud"
+                        PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+
                 
             except ValueError as ve:
                 prediction = f"Input Error: {ve}"
@@ -139,11 +148,12 @@ def predict():
             if power_transformer is None or model is None:
                 prediction = "Error: Model or Transformer not loaded properly."
             else:
-                transformed_features = power_transformer.transform(features_df)
-                transformed_df = pd.DataFrame(transformed_features, columns=features_df.columns)
-                result = model.predict(transformed_df)
-                prediction = "Fraud" if result[0] == 1 else "Non-Fraud"
-                PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+                transformed_features = preprocess_input(values)
+                if transformed_features is not None:
+                    result = model.predict(transformed_features)
+                    prediction = "Fraud" if result[0] == 1 else "Non-Fraud"
+                    PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+
         except Exception as e:
             prediction = f"Error processing input: {e}"
     
