@@ -35,7 +35,7 @@ class TestCreditFraudModel(unittest.TestCase):
         cls.transformer = pickle.load(open('models/power_transformer.pkl', 'rb'))
 
         # Load test dataset
-        cls.test_data = pd.read_csv('data/processed/test_data.csv')
+        cls.test_data = pd.read_csv('data/processed/test_final.csv')
 
     @staticmethod
     def get_latest_model_version(model_name, stage="Staging"):
