@@ -47,23 +47,32 @@ jobs:
           dvc repro
 
 
-    #   - name: Run model tests
-    #     env:
-    #       CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
-    #     run: |
-    #       python -m unittest tests/test_model.py
+      - name: Run model tests
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: |
+          python -m unittest tests/test_model.py
 
-    #   - name: Promote model to production
-    #     if: success()
-    #     env:
-    #       CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
-    #     run: python scripts/promote_model.py
+      - name: Promote model to production
+        if: success()
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: python scripts/promote_model.py
 
-    #   - name: Run Flask app tests
-    #     if: success()
-    #     env:
-    #       CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
-    #     run: python -m unittest tests/test_flask_app.py
+      - name: Run Flask app tests
+        if: success()
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: python -m unittest tests/test_flask_app.py
 
     #   - name: Login to AWS ECR
     #     if: success()
